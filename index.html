@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHEEEZ — Visitor Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #ED2424;
+    --dark: #ffffff;
+    --mid: #f4f4f4;
+    --light: #111111;
+    --green: #16a34a;
+    --red: #f87171;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--light);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: #ffffff;
+    border-bottom: 3px solid var(--yellow);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--yellow);
+  }
+  .logo span { color: var(--light); font-size: 13px; font-family: 'DM Sans', sans-serif; letter-spacing: 1px; display: block; margin-top: -4px; }
+
+  .store-badge {
+    background: var(--yellow);
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Layout ── */
+  main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    flex: 1;
+  }
+
+  /* ── Form Panel ── */
+  .form-panel {
+    padding: 32px 36px;
+    border-right: 1px solid #e5e5e5;
+  }
+
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(232,200,74,0.3);
+  }
+
+  /* Store selector */
+  .store-select-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .store-btn {
+    flex: 1;
+    min-width: 130px;
+    padding: 10px 14px;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: var(--radius);
+    color: var(--light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .store-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+  .store-btn.active {
+    background: var(--yellow);
+    color: var(--dark);
+    border-color: var(--yellow);
+    font-weight: 700;
+  }
+
+  /* Field groups */
+  .field-group { margin-bottom: 24px; }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #888888;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    padding: 10px 18px;
+    background: #f4f4f4;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    color: var(--light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--yellow); }
+  .chip.selected {
+    background: var(--yellow);
+    color: var(--dark);
+    border-color: var(--yellow);
+    font-weight: 700;
+  }
+
+  /* Age — number stepper */
+  .age-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #f4f4f4;
+    border: 1.5px solid #ddd;
+    border-radius: var(--radius);
+    overflow: hidden;
+    width: fit-content;
+  }
+  .age-btn {
+    width: 48px;
+    height: 48px;
+    background: none;
+    border: none;
+    color: var(--yellow);
+    font-size: 22px;
+    cursor: pointer;
+    transition: background 0.1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .age-btn:hover { background: rgba(232,200,74,0.15); }
+  .age-display {
+    min-width: 90px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--light);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    border-right: 1px solid #e5e5e5;
+    padding: 0 12px;
+    line-height: 48px;
+  }
+  .age-group-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #999999;
+  }
+
+  /* Store setup */
+  .store-setup-btn {
+    width: 100%;
+    padding: 16px;
+    background: #f4f4f4;
+    border: 2px solid #ddd;
+    border-radius: var(--radius);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: #111;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .store-setup-btn:hover { background: #ED2424; color: #fff; border-color: #ED2424; }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: #ED2424;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .submit-btn:hover { background: #d41e1e; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,25,44,0.3); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 1; background: #c0c0c0; color: #888; cursor: not-allowed; transform: none; box-shadow: none; }
+  .submit-btn { position: relative; overflow: hidden; }
+  .submit-btn .progress-fill {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    width: 0%;
+    background: rgba(255,255,255,0.25);
+    transition: none;
+    pointer-events: none;
+  }
+  .submit-btn.filling .progress-fill {
+    width: 100%;
+    transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--green);
+    color: #0a2e18;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 28px;
+    border-radius: 40px;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 1000;
+    box-shadow: 0 8px 30px rgba(74,222,128,0.3);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Stats Panel ── */
+  .stats-panel {
+    padding: 32px 24px;
+    background: #fafafa;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+
+  .stat-section { margin-bottom: 28px; }
+  .stat-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #aaaaaa;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: #f4f4f4;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+  .stat-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    line-height: 1;
+    color: var(--yellow);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: #888888;
+    margin-top: 4px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .bar-label {
+    font-size: 12px;
+    width: 80px;
+    color: #555555;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .bar-pct {
+    font-size: 11px;
+    color: #999999;
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .revisit-ring {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--mid);
+    border-radius: var(--radius);
+  }
+  .ring-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid #e0e0e0;
+    border-top-color: var(--yellow);
+    border-right-color: var(--yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .ring-pct {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    color: var(--yellow);
+  }
+  .ring-info .big { font-size: 15px; font-weight: 600; }
+  .ring-info .small { font-size: 11px; color: #999999; margin-top: 3px; }
+
+  .export-btn {
+    width: 100%;
+    padding: 11px;
+    background: none;
+    border: 1.5px solid rgba(232,25,44,0.4);
+    border-radius: var(--radius);
+    color: var(--yellow);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 16px;
+  }
+  .export-btn:hover { background: rgba(232,200,74,0.1); border-color: var(--yellow); }
+
+  .clear-btn {
+    width: 100%;
+    padding: 9px;
+    background: none;
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: var(--radius);
+    color: rgba(248,113,113,0.6);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+  .clear-btn:hover { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.05); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: #e5e5e5;
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Store Setup Overlay -->
+<div id="storeOverlay" style="display:none;position:fixed;inset:0;background:#fff;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <img src="https://cheeezltd.github.io/CHEEEZ-Visitor-Log/logo.png" style="height:45px;width:auto;" alt="CHEEEZ">
+  <div style="font-size:13px;font-weight:600;letter-spacing:2px;color:#aaa;text-transform:uppercase;">Select Your Store</div>
+  <div style="display:flex;flex-direction:column;gap:12px;width:300px;">
+    <button class="store-setup-btn" onclick="setupStore('Leicester Square')">Leicester Square</button>
+    <button class="store-setup-btn" onclick="setupStore('Tottenham Court Rd')">Tottenham Court Rd</button>
+    <button class="store-setup-btn" onclick="setupStore('Camden')">Camden</button>
+  </div>
+</div>
+
+<header>
+  <div style="display:flex;align-items:center;gap:14px;"><img src="https://cheeezltd.github.io/CHEEEZ-Visitor-Log/logo.png" style="height:22px;width:auto;" alt="CHEEEZ"><span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;color:#888;text-transform:uppercase;">Staff Portal — Visitor Log</span></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="store-badge" id="headerStore">Select Store</div>
+    <button onclick="changeStore()" style="background:none;border:1px solid #ddd;border-radius:20px;padding:5px 10px;font-size:11px;color:#aaa;cursor:pointer;">Change</button>
+  </div>
+</header>
+
+<main>
+  <!-- ── FORM PANEL ── -->
+  <div class="form-panel">
+    <div class="panel-title">New Visitor Entry</div>
+
+    <!-- Age group buttons -->
+    <div class="field-group">
+      <span class="field-label">🎂 Age Group (estimate)</span>
+      <div class="chip-row">
+        <div class="chip" onclick="selectChip(this, 'age')">18–19</div>
+        <div class="chip" onclick="selectChip(this, 'age')">Early 20s</div>
+        <div class="chip" onclick="selectChip(this, 'age')">Late 20s</div>
+        <div class="chip" onclick="selectChip(this, 'age')">30s</div>
+        <div class="chip" onclick="selectChip(this, 'age')">40s+</div>
+      </div>
+    </div>
+
+    <!-- Gender -->
+    <div class="field-group">
+      <span class="field-label">👤 Gender</span>
+      <div class="chip-row">
+        <div class="chip" onclick="selectChip(this, 'gender')">Female</div>
+        <div class="chip" onclick="selectChip(this, 'gender')">Male</div>
+        <div class="chip" onclick="selectChip(this, 'gender')">Mixed</div>
+      </div>
+    </div>
+
+    <!-- Revisit -->
+    <div class="field-group">
+      <span class="field-label">🔄 Visit Type</span>
+      <div class="chip-row">
+        <div class="chip" onclick="selectChip(this, 'revisit')" style="font-size:15px">✅ Returning</div>
+        <div class="chip" onclick="selectChip(this, 'revisit')" style="font-size:15px">🆕 First Visit</div>
+      </div>
+    </div>
+
+    <!-- Group type (bonus quick field) -->
+    <div class="field-group">
+      <span class="field-label">👥 Group Type</span>
+      <div class="chip-row">
+        <div class="chip" onclick="selectChip(this, 'group')">Friends</div>
+        <div class="chip" onclick="selectChip(this, 'group')">Couple</div>
+        <div class="chip" onclick="selectChip(this, 'group')">Family</div>
+        <div class="chip" onclick="selectChip(this, 'group')">Solo</div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitEntry()" disabled><span class="progress-fill" id="progressFill"></span>RECORD VISIT</button>
+  </div>
+
+  <!-- ── STATS PANEL ── -->
+  <div class="stats-panel">
+    <div class="stat-section">
+      <div class="stat-section-title">TODAY'S COUNT</div>
+      <div class="stat-card">
+        <div class="stat-big" id="totalCount">0</div>
+        <div class="stat-label">Total Visitors</div>
+      </div>
+    </div>
+
+    <div class="stat-section">
+      <div class="stat-section-title">RETURNING TODAY</div>
+      <div class="stat-card">
+        <div class="stat-big" id="returningCount" style="color:#16a34a;">0</div>
+        <div class="stat-label">Returning Visitors</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stat-section">
+      <div class="stat-section-title">Age Distribution</div>
+      <div id="ageStats"></div>
+    </div>
+
+    <div class="stat-section">
+      <div class="stat-section-title">Gender</div>
+      <div id="genderStats"></div>
+    </div>
+
+    <div class="stat-section">
+      <div class="stat-section-title">Group Type</div>
+      <div id="groupStats"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="export-btn" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+</main>
+
+<div class="toast" id="toast">✓ Recorded!</div>
+
+<script>
+// ── Google Sheets Web App URL ──
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxltcuOG2itqjuZxA3B-NoiWefUON--qL8A2dUgnn8qAXsMvYbjnJcCdAxTmvas2xlV/exec';  // ← Paste your Apps Script URL here
+
+// ── State ──
+let currentStore = localStorage.getItem('cheeez_store') || '';
+let selections = { age: null, gender: null, revisit: null, group: null };
+let records = JSON.parse(localStorage.getItem('cheeez_records') || '[]');
+
+// ── Store Setup ──
+function setupStore(name) {
+  currentStore = name;
+  localStorage.setItem('cheeez_store', name);
+  document.getElementById('headerStore').textContent = name;
+  document.getElementById('storeOverlay').style.display = 'none';
+}
+
+function changeStore() {
+  document.getElementById('storeOverlay').style.display = 'flex';
+}
+
+// Show overlay if no store selected
+if (!currentStore) {
+  document.getElementById('storeOverlay').style.display = 'flex';
+} else {
+  document.getElementById('headerStore').textContent = currentStore;
+  document.getElementById('storeOverlay').style.display = 'none';
+}
+
+// ── Chips ──
+function selectChip(el, group) {
+  el.closest('.chip-row').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selections[group] = el.textContent.trim();
+  checkSubmit();
+}
+
+// ── Submit check ──
+function checkSubmit() {
+  const ready = selections.age && selections.gender && selections.revisit && selections.group;
+  document.getElementById('submitBtn').disabled = !ready;
+}
+
+// ── Submit ──
+async function submitEntry() {
+  const btn = document.getElementById('submitBtn');
+  
+  // Start fill animation
+  btn.style.pointerEvents = 'none';
+  btn.innerHTML = '<span class="progress-fill" id="progressFill"></span>SENDING...';
+  btn.classList.add('filling');
+
+  const record = {
+    ts: new Date().toISOString(),
+    date: new Date().toLocaleDateString('en-GB', {timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-'),
+    time: new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
+    store: currentStore,
+    ageGroup: selections.age,
+    gender: selections.gender,
+    revisit: selections.revisit,
+    group: selections.group
+  };
+  records.push(record);
+  localStorage.setItem('cheeez_records', JSON.stringify(records));
+
+  // Send to Google Sheets
+  if (SHEETS_URL) {
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      });
+    } catch(e) { console.warn('Sheets send failed:', e); }
+  }
+
+  // Reset selections
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  selections = { age: null, gender: null, revisit: null, group: null };
+
+  // Success state
+  btn.classList.remove('filling');
+  btn.innerHTML = '✓ RECORDED!';
+  btn.style.background = '#16a34a';
+  btn.style.pointerEvents = '';
+  
+  setTimeout(() => {
+    btn.innerHTML = '<span class="progress-fill" id="progressFill"></span>RECORD VISIT';
+    btn.style.background = '';
+    checkSubmit();
+  }, 1500);
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+  updateStats();
+}
+
+// ── Stats ──
+function updateStats() {
+  const today = new Date().toLocaleDateString('en-GB', {timeZone:'Europe/London', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-');
+  
+  // Auto-clear old data (keep only today's)
+  const filtered = records.filter(r => r.date === today);
+  if (filtered.length !== records.length) {
+    records = filtered;
+    localStorage.setItem('cheeez_records', JSON.stringify(records));
+  }
+
+  const todayRecords = records.filter(r => r.store === currentStore);
+  const total = todayRecords.length;
+
+  document.getElementById('totalCount').textContent = total;
+  const returning = todayRecords.filter(r => r.revisit === '✅ Returning').length;
+  document.getElementById('returningCount').textContent = returning;
+
+  // Age groups
+  const ageGroups = ['18–19','Early 20s','Late 20s','30s','40s+'];
+  const ageCounts = {};
+  ageGroups.forEach(g => ageCounts[g] = 0);
+  todayRecords.forEach(r => { if (ageCounts[r.ageGroup] !== undefined) ageCounts[r.ageGroup]++; });
+  renderBars('ageStats', ageCounts, total);
+
+  // Gender
+  const genderCounts = { 'Female': 0, 'Male': 0, 'Mixed': 0 };
+  todayRecords.forEach(r => { if (genderCounts[r.gender] !== undefined) genderCounts[r.gender]++; });
+  renderBars('genderStats', genderCounts, total);
+
+  // Group
+  const groupCounts = { 'Friends': 0, 'Couple': 0, 'Family': 0, 'Solo': 0 };
+  todayRecords.forEach(r => { if (groupCounts[r.group] !== undefined) groupCounts[r.group]++; });
+  renderBars('groupStats', groupCounts, total);
+}
+
+function renderBars(containerId, counts, total) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  Object.entries(counts).forEach(([label, count]) => {
+    if (count === 0 && total > 0) return;
+    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+    el.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label">${label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-pct">${pct}%</div>
+      </div>`;
+  });
+  if (total === 0) el.innerHTML = '<div style="font-size:12px;color:rgba(245,240,224,0.25);padding:4px 0">No data yet</div>';
+}
+
+// ── Export CSV ──
+function exportCSV() {
+  if (records.length === 0) { alert('No records found.'); return; }
+  const headers = ['Date','Time','Store','Age Group','Gender','Visit Type','Group Type'];
+  const rows = records.map(r => [r.date, r.time, r.store, r.ageGroup, r.gender, r.revisit.replace('✅ ','').replace('🆕 ',''), r.group]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `CHEEEZ_visitor_log_${new Date().toISOString().slice(0,10)}csv`;
+  a.click();
+}
+
+// Init
+updateStats();
+</script>
+</body>
+</html>
